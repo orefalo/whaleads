@@ -1,9 +1,7 @@
 // Broadcasts: API client, shared types and the pure helpers the wizard and detail page lean on (tested in test/broadcasts.ui.test.ts).
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { FIELDS, type FieldName } from '../../../src/broadcasts/params'
 import { paramProblem, placeholders, renderParams } from '../../../src/templateRules'
 import { ApiError, api } from './api'
-import { useLiveEvents } from './live'
 import type { Tpl } from './templates'
 
 /** Mirrors MAX_AUDIENCE in src/broadcasts/audience.ts (a test pins them together; importing it would drag Worker types into the UI build). */
@@ -252,37 +250,3 @@ export const OPT_OUT_SOURCE_LABEL: Record<string, string> = {
 
 /** The two contact fields the lead detail and inbox thread payloads carry. */
 export interface OptOutFields { opted_out_at?: number | null; opt_out_source?: string | null }
-
-/**
- * Whether a contact has opted out of broadcasts, with the manual toggle. The state comes from the lead / thread payload
- * (`payload`); a toggle or the contact's `lead.update` (the server publishes one on every change) overrides it with a fresh
- * read of GET /api/contacts/:id until the payload itself changes.
- */
-export function useOptOut(contactId: number | null, payload?: OptOutFields | null) {
-  const [over, setOver] = useState<OptOutState | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
-  const live = useRef(0)
-  const base: OptOutState | null = payload ? { optedOut: !!payload.opted_out_at, source: payload.opt_out_source ?? null } : null
-  const st = over ?? base
-  useEffect(() => { setOver(null); setErr('') }, [contactId, payload?.opted_out_at, payload?.opt_out_source])
-  const load = useCallback(async () => {
-    if (contactId === null) return
-    const n = ++live.current
-    try {
-      const r = await api<{ contact: { opted_out_at: number | null; opt_out_source: string | null } }>(`/api/contacts/${contactId}`)
-      if (n === live.current) setOver({ optedOut: !!r.contact.opted_out_at, source: r.contact.opt_out_source })
-    } catch { /* the chip is an extra; the page works without it */ }
-  }, [contactId])
-  useLiveEvents((s) => { if (s.type === 'resync' || (s.type === 'lead.update' && String(s.data?.contact_id) === String(contactId))) void load() })
-  const toggle = useCallback(async () => {
-    if (contactId === null || !st) return
-    setBusy(true); setErr('')
-    try {
-      const r = await api<{ opted_out_at: number | null; opt_out_source: string | null }>(`/api/contacts/${contactId}/opt-out`, { method: 'PATCH', body: { opted_out: !st.optedOut } })
-      live.current++
-      setOver({ optedOut: !!r.opted_out_at, source: r.opt_out_source })
-    } catch (e) { setErr(broadcastErrorText(e)) } finally { setBusy(false) }
-  }, [contactId, st])
-  return { st, busy, err, toggle }
-}

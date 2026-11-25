@@ -1,4 +1,14 @@
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-export const cn = (...i: ClassValue[]) => twMerge(clsx(i))
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// oxlint-disable-next-line typescript/no-explicit-any
+export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
+export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
+// oxlint-disable-next-line typescript/no-explicit-any
+export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, 'children'> : T;
+export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
+export type RenameTypeToMode<T> = T extends { type: infer M } ? Omit<T, 'type'> & { mode: M } : T;

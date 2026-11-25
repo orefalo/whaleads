@@ -3,7 +3,7 @@
 How each part of the app behaves, for the person running an instance. Deploying is in [DEPLOY.md](DEPLOY.md); routes are in [API.md](API.md); automations in [AUTOMATIONS.md](AUTOMATIONS.md); adaptor setup in [ADAPTORS.md](ADAPTORS.md).
 
 ## Web app, setup and auth
-`ui/` is a Vite + React SPA served by Workers Static Assets (`dist/`, built by `npm run build`). Only `/api/*` and `/webhooks/*` run the Worker first; any other path is a static file or falls back to `index.html`.
+`ui/` is a SvelteKit 3 single-page app (client-rendered, `adapter-static`, coss ui components in `ui/src/lib/components/ui/`) served by Workers Static Assets (`dist/`, built by `npm run build`). Only `/api/*` and `/webhooks/*` run the Worker first; any other path is a static file or falls back to `index.html`.
 
 - **First boot.** Open `https://<host>/setup`. The setup key is the Worker's `SESSION_SECRET`. It creates the first admin, the business settings and a VAPID keypair (private half encrypted under a key derived from `SESSION_SECRET`), then signs you in. The lock is a single D1 batch, so two simultaneous setups yield one 201 and one 409. Without `SESSION_SECRET`, setup, login and recovery answer 503 `session_secret_missing`.
 - **Passwords.** PBKDF2-SHA256, 100000 iterations, 16-byte salt, stored as `pbkdf2-sha256$<iter>$<salt>$<hash>`. Unknown or inactive accounts still run a full hash so timing does not reveal which emails exist. Minimum length 10.
@@ -193,8 +193,8 @@ One WebSocket per browser tab to `GET /api/live`, backed by a single SQLite Dura
 
 ## Build and run
 - `npm run dev` runs the Worker (`wrangler dev`, port 8787; `build.command` builds the SPA first). Put `SESSION_SECRET` and `ADMIN_KEY` in `.dev.vars`.
-- `npm run dev:ui` runs Vite with HMR and proxies `/api` and `/webhooks` to `:8787`.
-- `npm run build` writes the SPA to `dist/`. `npm run typecheck` checks the Worker and `ui/`.
+- `npm run dev:ui` runs the SvelteKit dev server (Vite, HMR) and proxies `/api` and `/webhooks` (including the live WebSocket) to `:8787`.
+- `npm run build` writes the SPA to `dist/`, then moves SvelteKit's inline boot script into a hashed file so the page CSP can stay `script-src 'self'`. `npm run typecheck` checks the Worker (`tsconfig.worker.json`) and `ui/` (`svelte-check`).
 
 ## Tests
 `npm test` (vitest, no Cloudflare runtime needed; D1 is shimmed over `node:sqlite`, so the real migrations and SQL run).

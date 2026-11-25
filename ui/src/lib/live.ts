@@ -1,7 +1,6 @@
 // D20: the live channel in the browser. ONE WebSocket per tab to GET /api/live, opened after login.
 // While it is OPEN, the screens drop to a slow safety poll and take their updates from events; while it is not
 // (connecting, blocked, server down) the normal 4 s / 10 s / 15 s polling carries everything. Polling is never removed.
-import { createContext, createElement, useContext, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react'
 
 export type LiveEventType = 'message.new' | 'message.status' | 'conversation.update' | 'unread.total' | 'lead.new' | 'lead.update' | 'flow.run' | 'flow.updated' | 'broadcast.progress'
 export interface LiveEvent { type: LiveEventType; ts: number; data: any }
@@ -106,30 +105,4 @@ export class LiveClient {
   }
 }
 
-const defaultUrl = () => `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/api/live`
-const Ctx = createContext<LiveClient | null>(null)
-
-/** Mount once inside the signed-in shell: the socket lives exactly as long as the session UI does. */
-export function LiveProvider({ children, client }: { children: ReactNode; client?: LiveClient }) {
-  const ref = useRef<LiveClient | null>(null)
-  if (!ref.current) ref.current = client ?? new LiveClient(defaultUrl)
-  const c = ref.current
-  useEffect(() => { c.start(); return () => c.stop() }, [c])
-  return createElement(Ctx.Provider, { value: c }, children)
-}
-
-const never = new LiveClient(defaultUrl) // outside a provider: never started, state 'off'
-/** 'open' only while the socket is attached; everything else means "keep polling". */
-export function useLiveState(): LiveState {
-  const c = useContext(Ctx) ?? never
-  return useSyncExternalStore(c.subscribeState, () => c.state, () => 'off' as LiveState)
-}
-export const useLiveOpen = () => useLiveState() === 'open'
-
-/** Subscribe to events (and the client-made `resync`). The handler may change every render. */
-export function useLiveEvents(handler: (s: LiveSignal) => void): void {
-  const c = useContext(Ctx) ?? never
-  const h = useRef(handler)
-  h.current = handler
-  useEffect(() => c.subscribe((s) => h.current(s)), [c])
-}
+export const defaultLiveUrl = () => `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/api/live`

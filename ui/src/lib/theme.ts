@@ -5,8 +5,7 @@ export function getTheme(): Theme {
   try { return localStorage.getItem(KEY) === 'dark' ? 'dark' : 'light' } catch { return 'light' }
 }
 export function applyTheme(t: Theme) {
-  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark')
-  else document.documentElement.removeAttribute('data-theme')
+  document.documentElement.classList.toggle('dark', t === 'dark')
 }
 export function setTheme(t: Theme) {
   applyTheme(t)

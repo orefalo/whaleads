@@ -1,5 +1,4 @@
 // Shared CRM types, the pipeline metadata loader and day/time helpers for the Leads, Today and Contacts screens.
-import { useCallback, useEffect, useState } from 'react'
 import { localDate, localTime, startOfDay, startOfNextDay, zonedToEpoch } from '../../../src/daytime'
 import { api } from './api'
 import { displayName } from './inbox'
@@ -27,23 +26,6 @@ export const leadName = (l: { name: string | null; phone: string | null; wa_id: 
 
 export interface Meta { stages: Stage[]; sources: Source[]; tags: Tag[]; owners: Owner[] }
 export type MetaState = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; data: Meta }
-
-/** Stages, sources, tags and owners: everything the filters and pickers need. */
-export function useMeta() {
-  const [state, setState] = useState<MetaState>({ status: 'loading' })
-  const load = useCallback(async () => {
-    setState({ status: 'loading' })
-    try {
-      const [s, so, t, o] = await Promise.all([
-        api<{ stages: Stage[] }>('/api/stages'), api<{ sources: Source[] }>('/api/sources'),
-        api<{ tags: Tag[] }>('/api/tags'), api<{ owners: Owner[] }>('/api/leads/owners'),
-      ])
-      setState({ status: 'ready', data: { stages: s.stages, sources: so.sources, tags: t.tags, owners: o.owners } })
-    } catch (e) { setState({ status: 'error', message: (e as Error).message }) }
-  }, [])
-  useEffect(() => { void load() }, [load])
-  return { state, reload: load }
-}
 
 export const stageTone = (kind: string | null | undefined) => (kind === 'won' ? 'green' : kind === 'lost' ? 'neutral' : 'blue')
 

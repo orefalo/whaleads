@@ -1,0 +1,50 @@
+@import '@fontsource-variable/manrope';
+@import '#lib/components/ui/global.css';
+
+/* WhaLeads brand on top of the coss tokens: warm neutrals, coral primary, Manrope. */
+:root {
+  --font-sans: 'Manrope Variable', system-ui, sans-serif;
+  --background: hsl(40 25% 96%);
+  --foreground: hsl(226 45% 14%);
+  --card: hsl(40 30% 99%);
+  --card-foreground: var(--foreground);
+  --popover: hsl(40 30% 99%);
+  --popover-foreground: var(--foreground);
+  --primary: hsl(12 85% 52%);
+  --primary-foreground: hsl(0 0% 100%);
+  --muted: hsl(38 18% 91%);
+  --muted-foreground: hsl(226 12% 40%);
+  --border: hsl(38 14% 84%);
+  --input: hsl(38 14% 80%);
+  --ring: hsl(12 85% 52%);
+  --sidebar: hsl(40 30% 99%);
+  /* chart series (validated with the dataviz palette script, light and dark) */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+}
+.dark {
+  --background: hsl(226 35% 9%);
+  --foreground: hsl(40 25% 94%);
+  --card: hsl(226 30% 12%);
+  --popover: hsl(226 30% 14%);
+  --primary: hsl(12 85% 60%);
+  --primary-foreground: hsl(226 45% 10%);
+  --muted: hsl(226 25% 17%);
+  --muted-foreground: hsl(226 12% 65%);
+  --border: hsl(226 20% 22%);
+  --input: hsl(226 20% 26%);
+  --ring: hsl(12 85% 60%);
+  --sidebar: hsl(226 30% 12%);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

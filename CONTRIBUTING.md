@@ -4,13 +4,13 @@ Thanks for looking. WhaLeads is a small, deliberately narrow tool: one WhatsApp 
 
 ## Dev setup
 
-You need Node 22 or newer (the unit tests use the built-in `node:sqlite`) and npm.
+You need Node 22.17 or newer (SvelteKit 3's minimum; the unit tests use the built-in `node:sqlite`) and npm.
 
 ```bash
 npm ci
 printf 'SESSION_SECRET=%s\nADMIN_KEY=%s\n' "$(openssl rand -hex 32)" "$(openssl rand -hex 24)" > .dev.vars   # git-ignored
 npm run dev        # the Worker on :8787 (builds the app first)
-npm run dev:ui     # optional: Vite with hot reload, proxies /api and /webhooks to :8787
+npm run dev:ui     # optional: SvelteKit dev server with hot reload, proxies /api and /webhooks to :8787
 ```
 
 Open `http://localhost:8787/setup`; the setup key is the `SESSION_SECRET` from `.dev.vars`. `ADMIN_KEY` is optional and only enables bearer access for scripts.

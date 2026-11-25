@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "skills": {
+    "coss": {
+      "source": "cossui-svelte/cossui-svelte",
+      "commit": "6fd391b3dfdf546fb1ed1d08bc4cecd927ab2812",
+      "sourceType": "github",
+      "skillPath": "static/skills/coss/SKILL.md",
+      "computedHash": "e68d155e19ed08b7bfb7f3fcc81803479af363453e2fb71ed8e28e350bceffdd"
+    },
+    "coss-particles": {
+      "source": "cossui-svelte/cossui-svelte",
+      "commit": "6fd391b3dfdf546fb1ed1d08bc4cecd927ab2812",
+      "sourceType": "github",
+      "skillPath": "static/skills/coss-particles/SKILL.md",
+      "computedHash": "afd796460ee022afb72992e1086b67b64ca0d5cd673607dcb2198ac648ef4f75"
+    }
+  }
+}
